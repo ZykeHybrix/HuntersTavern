@@ -1,0 +1,203 @@
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("puzzles.jpg");
+        }
+/*        #bartender {
+            position: inherit;
+        }
+
+        #bartender img {
+            position: absolute;
+        }*/
+
+        .top {
+            animation-name: fade;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            animation-duration: .25s;
+            animation-direction: alternate;
+/*            -webkit-animation-iteration-count: infinite;
+            -moz-animation-iteration-count: infinite;
+            -o-animation-iteration-count: infinite;*/
+            animation-iteration-count: 25;
+        }
+
+        @keyframes fade {
+            0% {
+                opacity: 1;
+            }
+            25% {
+                opacity: 1;
+            }
+            75% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body style="display:flex; align-items: center;">
+
+<div id="out">
+    <input type="file" name="data" id="data" onChange="readData();"/>
+</div>
+<div id="main" style="height: 80%; width: 1200px; background-color: #E8E8E8; text-align: center; margin: 0 auto; border-radius: 25px;">
+    <img src="logo.png" />
+    <br />
+    <br />
+    <img src="bar.png" />
+    <br />
+    <br />
+    <br />
+    <form action="javascript:;" onsubmit="loginForm()" method="post">
+        <div class="container">
+            <!--<label for="uname"><b>Hunter ID</b></label>-->
+            <input type="text" placeholder="Hunter ID" id="hunter_id" style="width: 550px;" required>
+
+            <button type="submit">Login</button>
+        </div>
+    </form>
+</div>
+
+<div id="bar" style="display: none; height: 80%; width: 1200px; background-color: #E8E8E8; text-align: center; margin: 0 auto; border-radius: 25px;">
+    <div id="text" style="float: left; width: 700px; height: 700px; overflow: auto;"></div>
+
+    <div id="bartender">
+        <img src="tavernbartender.jpg" id="bartender1" class="bottom" style="max-height: 700px; position: absolute;" />
+        <img src="tavernbartender2.jpg" id="bartender2" class="" style=" max-height: 700px; " />
+    </div>
+
+</div>
+
+<div id="money" style="display: none; background-color: #E8E8E8; border-radius: 25px; position: absolute; top: 75px; right: 75px; box-shadow: 0px 0px 10px;">
+    <h2 id="moneySpent">Current Tab : $0</h2>
+</div>
+
+</body>
+<script>
+    var moneySpent = 0;
+    var listOfHunter_ids = ['123', '321', '333'];
+    //var contentObjects = [{'title': 'Greed Island 1', 'content' : 'Greed Island is a famous video game in the world', 'price' : 2000}, {'title': 'Greed Island 2', 'content' : 'Greed Island is a famous video game in the world', 'price' : 2000}];
+    var objectsPurchased = [];
+    var contentObjects = [];
+
+
+    function loginForm() {
+        var hunter_id = document.getElementById('hunter_id').value;
+
+        if (listOfHunter_ids.includes(hunter_id)) {
+            document.getElementById('main').style.display = 'none';
+            document.getElementById('bar').style.display = '';
+            document.getElementById('money').style.display = '';
+        }
+
+        buildText();
+    }
+
+    function startTalking() {
+        document.getElementById('bartender2').className = '';
+        document.getElementById('bartender2').className = 'top';
+    }
+
+    function stopTalking() {
+        document.getElementById('bartender2').className = '';
+    }
+
+    function buildText() {
+        var textDiv = document.getElementById('text')
+
+        this.contentObjects.forEach(function(object, index){
+            var divElement = document.createElement("div");
+            divElement.onmouseover = function() {startTalking()};
+            divElement.onmouseout = function() {stopTalking()};
+            textDiv.appendChild(divElement);
+
+            var h1Element = document.createElement("h1");
+            h1Element.innerHTML = object.title;
+            h1Element.onclick = function() {purchasePrompt(index)};
+            divElement.appendChild(h1Element);
+
+            var pElement = document.createElement("p");
+            pElement.innerHTML = object.content;
+            pElement.id = 'textContent' + index;
+            pElement.style.display = 'none';
+            divElement.appendChild(pElement);
+
+        });
+    }
+
+    function purchasePrompt(id) {
+
+        if (objectsPurchased.includes(id)) {
+            toggleContent(id);
+            return;
+        }
+
+        var price = this.contentObjects[id].price;
+
+        if (confirm("Would you like to purchase this information for $" + price + "?")) {
+            //txt = "You pressed OK!";
+            toggleContent(id);
+            updateMoneySpent(price);
+            this.objectsPurchased.push(id);
+        } else {
+            //txt = "You pressed Cancel!";
+        }
+    }
+
+    function toggleContent(id) {
+
+        var element = document.getElementById('textContent' + id);
+        var current = element.style.display;
+
+        if (current == 'none') {
+            element.style.display = '';
+        } else {
+            element.style.display = 'none';
+        }
+
+    }
+
+    function updateMoneySpent(price) {
+        this.moneySpent += price;
+
+        document.getElementById('moneySpent').innerHTML = 'Current Tab: $' + this.moneySpent;
+    }
+
+    function readData() {
+        var input = document.getElementById('data');
+        if (input.files && input.files[0]) {
+
+            var reader = new FileReader();
+            reader.onload = function () {
+
+                var temp = reader.result;
+                var lines = temp.split('\n');
+
+                lines.forEach(function(object, index){
+                    if (index != 0) {
+                        var values = lines[index].split(',');
+                        value = values.map(function(value){
+                            return value.replace(/\"/g, '');
+                        });
+
+                        this.contentObjects.push({'title' : value[0], 'content' : value[1], 'price' : Number(value[2])});
+                    }
+                });
+                buildText();
+            };
+            // start reading the file. When it is done, calls the onload event defined above.
+            reader.readAsBinaryString(input.files[0]);
+
+            buildText();
+            document.getElementById('out').style.display = 'none';
+        }
+    }
+
+</script>
+</html>
+
