@@ -44,6 +44,7 @@
 
 <div id="out">
     <input type="file" name="data" id="data" onChange="readData();"/>
+    <a href="https://zykehybrix.github.io/HuntersTavern/testtavern.csv">Download Example</a>
 </div>
 <div id="main" style="height: 80%; width: 1200px; background-color: #E8E8E8; text-align: center; margin: 0 auto; border-radius: 25px;">
     <img src="https://zykehybrix.github.io/HuntersTavern/logo.png" />
@@ -180,12 +181,20 @@
 
                 lines.forEach(function(object, index){
                     if (index != 0) {
+
+                        var firstCommaPosition = lines[index].indexOf(',');
+                        var lastCommaPosition = lines[index].lastIndexOf(',');
+                        var content = lines[index].slice(firstCommaPosition + 1, lastCommaPosition);
+
                         var values = lines[index].split(',');
+
+                        /*
                         value = values.map(function(value){
                             return value.replace(/\"/g, '');
                         });
+                        */
 
-                        this.contentObjects.push({'title' : value[0], 'content' : value[1], 'price' : Number(value[2])});
+                        this.contentObjects.push({'title' : values[0], 'content' : content, 'price' : Number(values[values.length - 1])});
                     }
                 });
                 buildText();
